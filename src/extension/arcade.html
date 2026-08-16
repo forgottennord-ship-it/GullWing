@@ -42,7 +42,8 @@ button:hover{background:#222}
         3️⃣ Click <strong>🔬 See Analysis</strong> to view the raw evidence JSON that Gullwing produces.</p>
         <p style="margin-top:8px"><strong>What you're learning:</strong> Every submission becomes a <em>real ELF binary</em> that Gullwing analyzes through all 8 layers — identity, structure, semantics, entropy, ML classification, runtime, memory, and convergence. The same analysis that detects supply chain attacks on production systems is now analyzing code YOU control.</p>
         <p style="margin-top:8px;color:#64dc8c"><strong>Par</strong> = the optimal number of instructions. Fewer is better. But functional is the goal — optimization comes later.</p>
-    </div>
+    <div id="game-output" style="margin-top:15px;font-family:monospace"></div>
+</div>
 </div>
 
 <div class="level-select" id="levelSelect"></div>
@@ -58,6 +59,16 @@ button:hover{background:#222}
         <button class="primary" onclick="submitCode()">▶ Submit</button>
         <button onclick="seeAnalysis()">🔬 See Analysis</button>
         <button onclick="resetCode()">🔄 Reset</button>
+    
+    <div class="game-menu" style="margin-top:15px">
+        <h3>🎮 Binary Arcade Nest — 6 Games</h3>
+        <button onclick="launchGame('golf')">🏌️ Assembly Golf</button>
+        <button onclick="launchGame('cobol')">🦆 COBOL Quest</button>
+        <button onclick="launchGame('detective')">🔍 Binary Detective</button>
+        <button onclick="launchGame('entropy')">📊 Entropy Hunter</button>
+        <button onclick="launchGame('procurement')">💰 Procurement Pursuit</button>
+        <button onclick="launchGame('fleet')">🌐 Fleet Commander</button>
+    </div>
     </div>
     
     <div id="result"></div>
@@ -118,7 +129,32 @@ function resetCode() {
     document.getElementById("code").value = l.template;
 }
 
-async function submitCode() {
+async function launchGame(game) {
+    const games = {
+        golf: "/mnt/d/moabi/src/gullwing-arcade.lua",
+        cobol: "/mnt/d/moabi/arcade/cobol-quest/game.lua",
+        detective: "/mnt/d/moabi/arcade/binary-detective/game.lua",
+        entropy: "/mnt/d/moabi/arcade/entropy-hunter/game.lua",
+        procurement: "/mnt/d/moabi/arcade/procurement-pursuit/game.lua",
+        fleet: "/mnt/d/moabi/arcade/fleet-commander/game.lua",
+    };
+    
+    const path = games[game];
+    if (path) {
+        fetch('/api/run-game', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({game: path}),
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('game-output').innerHTML = 
+                '<pre>' + (data.output || 'Game launched') + '</pre>';
+        });
+    }
+}
+
+function submitCode() {
     const code = document.getElementById("code").value;
     const l = LEVELS[currentLevel-1];
     document.getElementById("result").innerHTML = "<div style='padding:12px;color:#888'>Compiling and analyzing with Gullwing...</div>";
